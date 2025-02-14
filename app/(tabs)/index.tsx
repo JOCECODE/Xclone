@@ -15,10 +15,9 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.leftHeader}>
-          <Image source={{ uri: 'https://placehold.co/40' }} style={styles.profileIcon} />
-          <Text style={styles.headerText}>Home</Text>
+          <Image source={{ uri: 'https://wallpapers.com/images/high/man-face-british-actor-henry-cavill-cn0szkq9wu85sq96.webp' }} style={styles.profileIcon} />
         </View>
-        <Image source={{ uri: 'https://placehold.co/30' }} style={styles.logo} />
+        <Image source={{ uri: 'https://cdn.prod.website-files.com/5d66bdc65e51a0d114d15891/64cebe1d31f50e161e4c825a_X-logo-transparent-white-twitter.png' }} style={styles.logo} />
         <TouchableOpacity style={styles.upgradeButton}>
           <Text style={styles.upgradeText}>Upgrade</Text>
         </TouchableOpacity>
@@ -115,15 +114,18 @@ const styles = StyleSheet.create({
   logo: {
     width: 30,
     height: 30,
+    marginLeft: 29,
   },
   upgradeButton: {
-    backgroundColor: 'yellow',
+    backgroundColor: 'transparent',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
+    borderColor: 'white',
+    borderWidth: 1,
   },
   upgradeText: {
-    color: 'black',
+    color: 'white',
     fontWeight: 'bold',
   },
   tabContainer: {
