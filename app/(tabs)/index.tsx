@@ -80,10 +80,12 @@ export default function HomeScreen() {
           </View>
         )}
       />
+      <TouchableOpacity style={styles.floatingButton}>
+      <MaterialCommunityIcons name="plus" color={'white'} size={36} />
+      </TouchableOpacity>
     </ThemedView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -106,15 +108,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 12,
   },
-  headerText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   logo: {
     width: 30,
     height: 30,
-    marginLeft: 29,
+    marginLeft: 30,
   },
   upgradeButton: {
     backgroundColor: 'transparent',
@@ -143,7 +140,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     backgroundColor: '#80808033',
-    height: '125%'
+    height: '125%',
   },
   tabText: {
     color: 'white',
@@ -205,5 +202,21 @@ const styles = StyleSheet.create({
     color: 'gray',
     marginLeft: 4,
     fontSize: 12,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: 'blue',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
