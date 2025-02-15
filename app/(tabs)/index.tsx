@@ -1,7 +1,10 @@
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { supabase } from '@/supabaseClient';
+import { Session } from '@supabase/supabase-js';
+import AuthComponent from '@/components/authComponent';
 
 const tweets = [
   { id: '1', name: 'John Doe', handle: '@johndoe', content: 'Hello Twitter!', avatar: 'https://placehold.co/50' },
@@ -10,6 +13,34 @@ const tweets = [
 
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState('For you');
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
+
+  // Check session ONCE before rendering
+  const checkSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    setSession(data.session);
+  };
+
+  // Logout function
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+  };
+
+  // If session is undefined (loading state), show loading
+  if (session === undefined) {
+    checkSession();
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="white" />
+      </View>
+    );
+  }
+
+  // If no session, show AuthComponent
+  if (!session) {
+    return <AuthComponent onAuthSuccess={checkSession} />;
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -22,7 +53,6 @@ export default function HomeScreen() {
           <Text style={styles.upgradeText}>Upgrade</Text>
         </TouchableOpacity>
       </View>
-      
       <View style={styles.tabContainer}>
         <TouchableOpacity 
           style={[styles.tabButton, activeTab === 'For you' && styles.activeTab]}
@@ -80,12 +110,13 @@ export default function HomeScreen() {
           </View>
         )}
       />
-      <TouchableOpacity style={styles.floatingButton}>
-      <MaterialCommunityIcons name="plus" color={'white'} size={36} />
+      <TouchableOpacity style={styles.floatingButton} onPress={handleSignOut}>
+        <MaterialCommunityIcons name="plus" color={'white'} size={36} />
       </TouchableOpacity>
     </ThemedView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -218,5 +249,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'black',
   },
 });

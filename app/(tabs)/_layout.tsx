@@ -51,8 +51,7 @@ export default function Layout() {
              <Tabs.Screen
         name="messages"
         options={{
-          tabBarActiveBackgroundColor: "white",
-          tabBarActiveTintColor: "yellow", // Active tab color
+          tabBarActiveTintColor: "white", // Active tab color
           tabBarInactiveTintColor: "gray",
           tabBarLabel: '',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="email-outline" color={color} size={32} />,
