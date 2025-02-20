@@ -8,15 +8,23 @@ export const useFetchTweets = () => {
       const { data, error } = await supabase
         .from('tweets')
         .select(`
-           id,
-           user_id, 
+          id, 
           content,
           media_url,
           likes, 
           retweets, 
           replies, 
           views, 
-          shares
+          shares, 
+          created_at,
+          users: user_id (
+            id, 
+            username, 
+            email, 
+            bio, 
+            avatar_url, 
+            created_at
+          )
         `)
         .order('created_at', { ascending: false });
 
