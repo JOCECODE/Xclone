@@ -20,20 +20,25 @@ export const useFetchTweets = () => {
           users: user_id (
             id, 
             username, 
-            email, 
+            email,
+            handle, 
             bio, 
             avatar_url, 
             created_at
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50); // Ensure we fetch more than 10 tweets
 
       if (error) {
         console.error("Error fetching tweets:", error.message);
         throw new Error(error.message);
       }
-      
-      return data || []; // Ensure it returns an empty array if no data
+
+      console.log("Fetched Tweets Count:", data.length); // Debugging
+      return data || [];
     },
   });
 };
+
+

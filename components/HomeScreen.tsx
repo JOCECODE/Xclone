@@ -6,52 +6,41 @@ import { ThemedView } from '@/components/ThemedView';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Session } from '@supabase/supabase-js';
 import { useFetchTweets } from '../hooks/useFetchTweets';
-  
+import AuthComponent from '@/components/authComponent';
+
 export default function HomeScreen() {
-      
-  const tweets = [
-    { id: '1', name: 'John Doe', handle: '@johndoe', content: 'Hello Twitter!', avatar: 'https://placehold.co/50' },
-    { id: '2', name: 'Jane Smith', handle: '@janesmith', content: 'Just posted my first tweet!', avatar: 'https://placehold.co/50' },
-  ];
-    const queryClient = useQueryClient();
-    const { data: tweetsNew, isLoading } = useFetchTweets();
-    if (!isLoading){
-        console.log(tweetsNew);  
-    }
-    const signOutMutation = useMutation({
-      mutationFn: async () => {
-        await supabase.auth.signOut();
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['session'] });
-      },
-    });
-  
-    const [activeTab, setActiveTab] = useState('For you');
-    const [session, setSession] = useState<Session | null | undefined>(undefined);
-  
-    // Check session ONCE before rendering
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-    };
-  
-    // Logout function
-    const handleSignOut = async () => {
-      await supabase.auth.signOut();
-      setSession(null);
-    };
-  
-    // If session is undefined (loading state), show loading
-    if (session === undefined) {
-      checkSession();
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="white" />
-        </View>
-      );
-    }
+  const queryClient = useQueryClient();
+  const { data: tweets, isLoading } = useFetchTweets();
+//   console.log(tweets[0].users.bio);
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState("For You");
+  // Check session immediately (no useEffect)
+  const checkSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    setSession(data.session);
+  };
+  checkSession(); // Runs once when component is rendered
+
+  // Sign out function
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null); // Ensures AuthComponent is shown after logout
+  };
+
+  // Show loading while checking session
+  if (session === undefined) {
     return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="white" />
+      </View>
+    );
+  }
+  
+  // If user is not authenticated, show AuthComponent
+  if (!session) {
+    return <AuthComponent />;
+  }
+      return (
       <ThemedView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.leftHeader}>
@@ -82,29 +71,35 @@ export default function HomeScreen() {
         <FlatList
           data={tweets}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+          initialNumToRender={20}  // Ensure at least 20 tweets render initially
+          maxToRenderPerBatch={20} // Allow all tweets to be rendered per batch
+          windowSize={10}          // Prevent React Native from skipping items
+          removeClippedSubviews={false} // Ensure tweets are not hidden
+          renderItem={({ item }) => {
+            const user = item.users || {};
+            return (
             <View style={styles.tweetContainer}>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
+              <Image source={{ uri: `${user.avatar_url}` }} style={styles.avatar} />
               <View style={styles.tweetContent}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.handle}>{item.handle}</Text>
+                <Text style={styles.name}>{user.username}</Text>
+                <Text style={styles.handle}>{user.handle}</Text>
                 <Text style={styles.tweetText}>{item.content}</Text>
                 <View style={styles.actionsContainer}>
                   <TouchableOpacity style={styles.actionButton}>
                     <MaterialCommunityIcons name="message-reply-outline" size={20} color="gray" />
-                    <Text style={styles.actionText}>2.1K</Text>
+                    <Text style={styles.actionText}>{item.replies}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionButton}>
                     <MaterialCommunityIcons name="repeat" size={20} color="gray" />
-                    <Text style={styles.actionText}>666</Text>
+                    <Text style={styles.actionText}>{item.retweets}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionButton}>
                     <MaterialCommunityIcons name="heart-outline" size={20} color="gray" />
-                    <Text style={styles.actionText}>7.1K</Text>
+                    <Text style={styles.actionText}>{item.likes}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionButton}>
                     <MaterialCommunityIcons name="chart-bar" size={20} color="gray" />
-                    <Text style={styles.actionText}>270K</Text>
+                    <Text style={styles.actionText}>{item.views}</Text>
                   </TouchableOpacity>
                   <View style={styles.rightActions}>
                     <TouchableOpacity style={styles.actionButton}>
@@ -117,7 +112,8 @@ export default function HomeScreen() {
                 </View>
               </View>
             </View>
-          )}
+            )
+          }}
         />
         <TouchableOpacity style={styles.floatingButton} onPress={handleSignOut}>
           <MaterialCommunityIcons name="plus" color={'white'} size={36} />
