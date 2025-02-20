@@ -1,9 +1,15 @@
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { SafeAreaView, Text } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export default function Layout() {
+
+  const queryClient = new QueryClient();
+
   return (
-    
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaView style={{ flex: 1 }}>
     <Tabs
       screenOptions={{
         tabBarStyle: { backgroundColor: 'black', padding: 5, },
@@ -67,5 +73,9 @@ export default function Layout() {
         }}
       />
     </Tabs>
+    </SafeAreaView>
+  </QueryClientProvider>
+  
   );
+
 }

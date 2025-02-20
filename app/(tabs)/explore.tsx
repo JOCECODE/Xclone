@@ -1,109 +1,126 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import useUploadAvatar from '@/hooks/useUploadAvatar';
+import { supabase } from '@/supabaseClient';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+export default function Profile() {
+  const uploadAvatarMutation = useUploadAvatar();
+  const [imageLoading, setImageLoading] = useState(false);
+  const [inhere, setInhere] = useState({});
 
-export default function TabTwoScreen() {
+  // ✅ Fetch authenticated user
+  const { data: user, isLoading: userLoading, error: userError } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      setInhere(data?.user);
+      return data?.user;
+    },
+  });
+  console.log(inhere);
+  console.log();
+  console.log("is you pop pop pop")
+  // ✅ Fetch user profile & avatar
+  const { data: userProfile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ['email', user?.email],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('avatar_path')
+        .eq('email', user?.email)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id, // Run only if user exists
+  });
+  console.log("here");
+  console.log(userProfile);
+
+  // const avatarUrl = userProfile?.avatar_path
+  //   ? supabase.storage.from('avatars').getPublicUrl(userProfile.avatar_path).data.publicUrl
+  //   : 'https://placehold.co/100'; // Default avatar
+
+  // const handleUpload = async () => {
+    
+  //   setImageLoading(true);
+    
+  //   await uploadAvatarMutation.mutateAsync(user?.id  undefined);
+    
+  //   setImageLoading(false);
+  // };
+
+  // if (userLoading || profileLoading) return <ActivityIndicator size="large" color="white" />;
+  // if (userError || profileError) return <Text style={styles.errorText}>Error loading profile.</Text>;
+
+       {/* Avatar Image
+      <TouchableOpacity style={styles.avatarContainer} onPress={handleUpload}>
+        {imageLoading ? (
+          <ActivityIndicator size="large" color="white" />
+        ) : (
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+        )}
+      </TouchableOpacity> */}
+
+      {/* Upload Button
+      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+        <MaterialCommunityIcons name="camera" size={24} color="white" />
+        <Text style={styles.uploadText}>Change Profile Picture</Text>
+      </TouchableOpacity>
+    </View> */}
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Profile</Text>
+      </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  titleContainer: {
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 20,
+  },
+  avatarContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: 'hidden',
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  uploadButton: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    backgroundColor: 'blue',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+  },
+  uploadText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10,
   },
 });
